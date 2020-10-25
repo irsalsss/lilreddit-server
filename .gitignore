@@ -1,0 +1,7 @@
+/redis-stable
+/node_modules
+/dist
+dump.rdb
+logfile
+yarn-error.log
+yarn.lock
