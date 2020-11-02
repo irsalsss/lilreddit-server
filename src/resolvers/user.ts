@@ -1,3 +1,4 @@
+import { COOKIE_NAME } from './../constans';
 import { User } from './../entities/User';
 import { MyContext } from 'src/type';
 import { Arg, Ctx, Field, InputType, Mutation, ObjectType, Query, Resolver } from "type-graphql";
@@ -119,5 +120,19 @@ export class UserResolver {
     req.session.user = user
 
     return { user }
+  }
+
+  @Mutation(() => Boolean)
+  logout(@Ctx() {req, res }: MyContext) {
+    return new Promise(resolve => req.session.destroy(err => {
+      res.clearCookie(COOKIE_NAME)
+      if (err){
+        console.log(err)
+        resolve(false)
+        return
+      }
+
+      resolve(true)
+    }))
   }
 }

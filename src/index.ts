@@ -1,3 +1,4 @@
+import { COOKIE_NAME } from './constans';
  // import { MyContext } from 'src/type';
 import { UserResolver } from './resolvers/user';
 import { PostResolver } from './resolvers/post';
@@ -34,7 +35,7 @@ const main = async() => {
 
   app.use(
     session({
-      name: 'qid',
+      name: COOKIE_NAME,
       store: new RedisStore({
         client: redisClient,
         disableTouch: true
