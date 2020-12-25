@@ -1,9 +1,9 @@
+import "reflect-metadata";
 import { COOKIE_NAME } from './constans';
- // import { MyContext } from 'src/type';
+// import { MyContext } from 'src/type';
 import { UserResolver } from './resolvers/user';
 import { PostResolver } from './resolvers/post';
 import { HelloResolver } from './resolvers/hello';
-import "reflect-metadata";
 import { __prod__ } from './constans';
 import { MikroORM } from "@mikro-orm/core";
 import microConfig from './mikro-orm.config';
@@ -14,6 +14,7 @@ import { buildSchema } from "type-graphql";
 import redis from 'redis';
 import session from 'express-session';
 import connectRedis from 'connect-redis';
+import { User } from './entities/User';
 
 import cors from 'cors';
 

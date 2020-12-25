@@ -7,6 +7,8 @@ import argon2 from 'argon2';
 @InputType()
 class UsernamePasswordInput {
   @Field()
+  email: string
+  @Field()
   username: string
   @Field()
   password: string
@@ -32,6 +34,11 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
+  @Mutation(() => Boolean)
+  async forgotPassword(@Arg('email') email: string, @Ctx() {em} : MyContext) {
+    // const user = await em.findOne(User, {email})
+    return true
+  }
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req, em }: MyContext){
     console.log("session: ", req.session)
@@ -47,6 +54,15 @@ export class UserResolver {
     @Arg('options') options: UsernamePasswordInput,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
+    if (!options.email.includes('@')){
+      return {
+        errors: [{
+          field: 'email',
+          message: 'invalid email'
+        }]
+      }
+    }
+
     if (options.username.length <= 2){
       return {
         errors: [{
@@ -64,10 +80,13 @@ export class UserResolver {
         }]
       }
     }
-    const hashedPassword = await argon2.hash(options.password)
+    const hashedPassword = await argon2.hash(options.password);
     const user = em.create(User, {
       username: options.username,
-      password: hashedPassword
+      password: hashedPassword,
+      email: options.email,
+      created_at: new Date(),
+      updated_at: new Date()
     })
 
     try {
