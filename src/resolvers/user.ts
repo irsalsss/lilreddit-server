@@ -1,10 +1,12 @@
 import { validateRegister } from './../utils/validateRegister';
-import { COOKIE_NAME } from './../constans';
+import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from './../constans';
 import { User } from './../entities/User';
 import { MyContext } from 'src/type';
 import { Arg, Ctx, Field, Mutation, ObjectType, Query, Resolver } from "type-graphql";
 import argon2 from 'argon2';
 import { UsernamePasswordInput } from './UsernamePasswordInput';
+import { sendEmail } from './../utils/sendEmail';
+import { v4 } from 'uuid';
 
 @ObjectType()
 class FieldError {
@@ -27,9 +29,27 @@ class UserResponse {
 @Resolver()
 export class UserResolver {
   @Mutation(() => Boolean)
-  async forgotPassword(@Arg('email') email: string, @Ctx() {em} : MyContext) {
-    // const user = await em.findOne(User, {email})
-    return true
+  async forgotPassword(@Arg('email') email: string, @Ctx() { em, redis } : MyContext) {
+    const user = await em.findOne(User, {email})
+    if (!user){
+      return true;
+    }
+
+    const token = v4();
+
+    await redis.set(
+      FORGOT_PASSWORD_PREFIX + token,
+      user.id,
+      'ex',
+      1000 * 60 * 60 * 24 * 3
+    ); // 3 days
+
+    await sendEmail(
+      email,
+      `<a href="http://localhost:3000/change-password/${token}">reset password</a>`
+    );
+
+    return true;
   }
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req, em }: MyContext){
